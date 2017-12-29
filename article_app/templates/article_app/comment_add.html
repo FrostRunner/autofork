@@ -1,0 +1,13 @@
+{% extends 'article_app/base.html' %}
+
+{% block form_css %}
+    {{ form.media.css }}
+{% endblock %}
+
+{% block form_js %}
+    {{ form.media.js }}
+{% endblock %}
+
+{% block content %}
+    {% include 'article_app/comment_form.html' %}
+{% endblock %}
