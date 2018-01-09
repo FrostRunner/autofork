@@ -7,12 +7,13 @@
     <title>{% block title %}{{ site_title }}{% endblock %}</title>
     {% block description %}
         <meta name="description" content="{{ site_description }}">
-        <meta name="yandex-verification" content="8f6f1bc67aeed293" />
+        <meta name="yandex-verification" content="45f4abf648005901" />
     {% endblock %}
     <link rel="stylesheet" href="{% static 'imagelightbox/imagelightbox-extended.min.css' %}">
     {% block form_css %}{% endblock %}
     <link rel="stylesheet" href="{% static 'style.css' %}">
     <link rel="alternate" type="application/rss+xml" title="{{ site_title }}" href="{% url 'article_app:rss' %}">
+    <link rel="shortcut icon" type="image/png" href="{%  static 'favicon.png'%}">
     {% block alternate %}{% endblock %}
 </head>
 <body>

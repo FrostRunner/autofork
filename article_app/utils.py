@@ -49,3 +49,7 @@ def random_string(len=24):
 def random_text(paragraphs=1):
     return ''.join([random_char_seq(24), ' '] +
                    lorem_ipsum.paragraphs(paragraphs))
+
+
+def get_filename(filename):
+    return filename.upper()

@@ -74,10 +74,12 @@ class TemplateSnippet(models.Model):
         if re.compile('[^a-z_]').search(self.name) is not None:
             raise ValidationError(_('Invalid name (a-z and _ only)'))
 
+from ckeditor_uploader.fields import RichTextUploadingField
 
 class Article(models.Model):
     title = models.CharField(_('article title'), max_length=255)
-    content = RichTextField(_('article content'), max_length=30000)
+    # content = RichTextField(_('article content'), max_length=30000)
+    content = RichTextUploadingField(_('article content'), max_length=30000, blank=True, default='')
     created = models.DateTimeField(_('article created'))
     updated = models.DateTimeField(_('article updated'), auto_now=True)
     category = models.ForeignKey(

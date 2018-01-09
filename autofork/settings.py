@@ -12,20 +12,21 @@ https://docs.djangoproject.com/en/1.10/ref/settings/
 
 import os
 
+from decouple import Csv, config
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.10/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'w(&dmmlsihqxk1#pqe40#f_k2ualpm3w3$xe%d*t!yk_s7x*xm'
+SECRET_KEY = config('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', cast=Csv())
 
 SITE_ID = 1
 
@@ -44,6 +45,7 @@ INSTALLED_APPS = [
     'article_app',
     'pagedown',
     'ckeditor',
+    'ckeditor_uploader',
 ]
 
 MIDDLEWARE = [
@@ -77,7 +79,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'autofork.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/1.10/ref/settings/#databases
 
@@ -87,7 +88,6 @@ DATABASES = {
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/1.10/ref/settings/#auth-password-validators
@@ -107,7 +107,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/1.10/topics/i18n/
 
@@ -121,21 +120,21 @@ USE_L10N = True
 
 USE_TZ = True
 
+EMAIL_BACKEND = config('EMAIL_BACKEND', default='django.core.mail.backends.smtp.EmailBackend')
+EMAIL_HOST = config('EMAIL_HOST', default='')
+EMAIL_PORT = config('EMAIL_PORT', default=587, cast=int)
+EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
+EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=True, cast=bool)
 
-
-# upload files on server
-CKEDITOR_UPLOAD_PATH = "uploads/"
-CKEDITOR_CONFIG = {
-    "default": {
-        "toolbar": "Basic",
-    },
-}
-CKEDITOR_JQUERY_URL = 'https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js'
-CKEDITOR_IMAGE_BACKEND = "pillow"
-
+DEFAULT_FROM_EMAIL = 'Django Boards <noreply@djangoboards.com>'
+EMAIL_SUBJECT_PREFIX = '[Django Boards] '
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.10/howto/static-files/
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
@@ -144,6 +143,16 @@ STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'static_common'),
 )
 
+# upload files on server
+CKEDITOR_UPLOAD_PATH = "uploads/"
+CKEDITOR_CONFIGS = {
+    "default": {
+        "toolbar": "Advanced",
+    },
+}
+
+CKEDITOR_IMAGE_BACKEND = "pillow"
+CKEDITOR_FILENAME_GENERATOR = 'utils.get_filename'
 
 try:
     from .production_settings import *

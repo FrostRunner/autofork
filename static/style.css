@@ -243,12 +243,6 @@ body {
     color: #104BA9;
 }
 
-
-.mw-headline{
-    color: red;
-}
-
-
 .article {
     margin-bottom: 50px;
 }
@@ -528,6 +522,13 @@ body {
     color: #666;
     font-size: 13px;
 }
+
+
+.mw-headline{
+    color: red;
+    font-size: 35px;
+}
+
 
 
 /*
