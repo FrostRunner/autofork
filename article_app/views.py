@@ -87,7 +87,7 @@ class CommentAdd(CreateView):
     template_name = 'article_app/comment_add.html'
 
     def form_valid(self, form):
-        if not self.request.user.is_authenticated():
+        if not self.request.user.is_authenticated:
             self.request.session['user_data'] = {
                 field: form.cleaned_data[field]
                 for field in ['user_name', 'user_email', 'user_url']
