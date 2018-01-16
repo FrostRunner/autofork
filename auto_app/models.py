@@ -3,7 +3,6 @@ from __future__ import unicode_literals
 from django.db import models
 
 
-
 class AutoModel(models.Model):
     make = models.CharField(max_length=255, default="Audi")
     model = models.CharField(max_length=255, default="A1")
@@ -12,7 +11,8 @@ class AutoModel(models.Model):
     engine = models.FloatField(default=2.0)
     engine_volume = models.IntegerField(default=1996)
     engine_power = models.IntegerField(default=220)
-    maximum_torque = models.CharField(max_length=255, default="600/1500-2910") # Нм / мин-1 600/1500-2910
+    maximum_torque = models.CharField(max_length=255,
+                                      default="600/1500-2910")  # Нм / мин-1 600/1500-2910
     number_cylinders = models.IntegerField(default=4)
     number_valves = models.IntegerField(default=4)
     location_cylinders = models.CharField(max_length=100, default="рядная")
@@ -113,3 +113,6 @@ class AutoModel(models.Model):
     # вентилируемые
     # Задние
     # дисковые
+
+    def __str__(self):
+        return "_".join([self.make, self.model])

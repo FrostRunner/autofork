@@ -17,6 +17,7 @@ from django.utils.translation import ugettext as _
 from pygments import highlight
 from pygments.formatters import HtmlFormatter
 from pygments.lexers import get_lexer_by_name
+from auto_app.models import AutoModel
 
 
 class PygmentsRenderer(mistune.Renderer):
@@ -84,6 +85,9 @@ class Article(models.Model):
     updated = models.DateTimeField(_('article updated'), auto_now=True)
     category = models.ForeignKey(
         Category, verbose_name=_('related category'), blank=True, null=True, on_delete=None
+    )
+    auto = models.ForeignKey(
+        AutoModel, verbose_name=_('related auto'), blank=True, null=True, on_delete=None
     )
     slug = models.CharField(_('article slug'), unique=True, max_length=100)
     description = models.CharField(
@@ -156,7 +160,7 @@ class Comment(models.Model):
         # article slug can be fetched in same query with .extra()
         if self._article_slug is not None:
             self._article_url = reverse(
-                'article_app:article', args=[self._article_slug]
+                'article_app:article', args=[self._article_slug, "123"]
             )
         if self._article_url is None:
             self._article_url = (

@@ -1,7 +1,10 @@
 from django.contrib import admin
 
-# Register your models here.
-
 from .models import AutoModel
 
-admin.site.register(AutoModel)
+
+class AutoModelAdmin(admin.ModelAdmin):
+    list_display = ('make', 'model')
+
+
+admin.site.register(AutoModel, AutoModelAdmin)
