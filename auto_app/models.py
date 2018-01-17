@@ -125,5 +125,6 @@ class AutoModel(models.Model):
     # Задние
     # дисковые
 
+
     def __str__(self):
-        return self.model
+        return "{}_{}".format(self.make.name, self.model)

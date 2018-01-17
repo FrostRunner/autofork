@@ -85,11 +85,7 @@ class Article(models.Model):
     category = models.ForeignKey(
         Category, verbose_name=_('related category'), blank=True, null=True, on_delete=models.CASCADE
     )
-    auto_make = models.ForeignKey(AutoMake, blank=True, null=True, on_delete=models.CASCADE)
     auto_model = models.ForeignKey(AutoModel, blank=True, null=True, on_delete=models.CASCADE)
-
-
-
     slug = models.CharField(_('article slug'), unique=True, max_length=100)
     description = models.CharField(_('article description'), blank=True, max_length=255)
     is_comment_allowed = models.BooleanField(_('comment allowed'), default=True)
@@ -99,7 +95,7 @@ class Article(models.Model):
     objects = ArticleQuerySet.as_manager()
 
     class Meta:
-        ordering = ['-created']
+        ordering = ['-created', 'auto_model']
         verbose_name = _('article')
         verbose_name_plural = _('articles')
 
@@ -114,16 +110,19 @@ class Article(models.Model):
         return self.description or (strip_tags(self.get_content())[:160]
                                     .replace('\n', ' ').replace('\r', ' '))
 
-    def get_auto_info(self, pk):
+    def get_auto_model_info(self, pk):
         return AutoModel.objects.get(pk=pk)
+
+    def get_auto_make_info(self, pk):
+        return AutoMake.objects.get(pk=pk)
 
     def get_absolute_url(self):
         # this expression also used in Comment.get_absolute_url()
         url_params = [self.slug]
-        if self.auto_id:
-            auto = self.get_auto_info(self.auto_id)
-            url_params.insert(0, '{}/'.format(auto.make))
-            url_params.insert(1, '{}/'.format(auto.model))
+        if self.auto_model:
+            url_params.insert(0, '{}/'.format(self.auto_model.model))
+            url_params.insert(0, '{}/'.format(self.auto_model.make.name))
+
         return reverse('article_app:article', args=url_params)
 
 
