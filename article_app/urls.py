@@ -11,6 +11,6 @@ urlpatterns = [
     url(r'^category/(?P<slug>[-_\w]+)/feed/$', CategoryRSS(), name='category_rss'),
     url(r'^comment/add/$', CommentAdd.as_view(), name='comment_add'),
     url(r'^comment/reply/(?P<article>\d+)/(?P<pk>\d+)$', CommentReply.as_view(), name='comment_reply'),
-    url(r'^(?P<slug>[-_\w]+)/$', ArticleDetail.as_view(), name='article'),
+    url(r'^([-_\w]+/)?([-_\w]+/)?(?P<slug>[-_\w]+)/$', ArticleDetail.as_view(), name='article'),
     url(r'^(?P<slug>[-_\w]+)/comments/feed/$', ArticleCommentsRSS(), name='article_comments_rss'),
 ]

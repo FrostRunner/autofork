@@ -5,7 +5,7 @@ import hashlib
 import re
 
 import mistune
-from ckeditor.fields import RichTextField
+from ckeditor_uploader.fields import RichTextUploadingField
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.db import models
 from django.urls import reverse
@@ -17,7 +17,8 @@ from django.utils.translation import ugettext as _
 from pygments import highlight
 from pygments.formatters import HtmlFormatter
 from pygments.lexers import get_lexer_by_name
-from auto_app.models import AutoModel
+
+from auto_app.models import AutoModel, AutoMake
 
 
 class PygmentsRenderer(mistune.Renderer):
@@ -75,24 +76,22 @@ class TemplateSnippet(models.Model):
         if re.compile('[^a-z_]').search(self.name) is not None:
             raise ValidationError(_('Invalid name (a-z and _ only)'))
 
-from ckeditor_uploader.fields import RichTextUploadingField
 
 class Article(models.Model):
     title = models.CharField(_('article title'), max_length=255)
-    # content = RichTextField(_('article content'), max_length=30000)
     content = RichTextUploadingField(_('article content'), max_length=30000, blank=True, default='')
     created = models.DateTimeField(_('article created'))
     updated = models.DateTimeField(_('article updated'), auto_now=True)
     category = models.ForeignKey(
-        Category, verbose_name=_('related category'), blank=True, null=True, on_delete=None
+        Category, verbose_name=_('related category'), blank=True, null=True, on_delete=models.CASCADE
     )
-    auto = models.ForeignKey(
-        AutoModel, verbose_name=_('related auto'), blank=True, null=True, on_delete=None
-    )
+    auto_make = models.ForeignKey(AutoMake, blank=True, null=True, on_delete=models.CASCADE)
+    auto_model = models.ForeignKey(AutoModel, blank=True, null=True, on_delete=models.CASCADE)
+
+
+
     slug = models.CharField(_('article slug'), unique=True, max_length=100)
-    description = models.CharField(
-        _('article description'), blank=True, max_length=255
-    )
+    description = models.CharField(_('article description'), blank=True, max_length=255)
     is_comment_allowed = models.BooleanField(_('comment allowed'), default=True)
     is_standalone = models.BooleanField(_('standalone page'), default=False)
     is_published = models.BooleanField(_('article published'), default=False)
@@ -113,17 +112,25 @@ class Article(models.Model):
 
     def get_description(self):
         return self.description or (strip_tags(self.get_content())[:160]
-            .replace('\n', ' ').replace('\r', ' '))
+                                    .replace('\n', ' ').replace('\r', ' '))
+
+    def get_auto_info(self, pk):
+        return AutoModel.objects.get(pk=pk)
 
     def get_absolute_url(self):
         # this expression also used in Comment.get_absolute_url()
-        return reverse('article_app:article', args=[self.slug])
+        url_params = [self.slug]
+        if self.auto_id:
+            auto = self.get_auto_info(self.auto_id)
+            url_params.insert(0, '{}/'.format(auto.make))
+            url_params.insert(1, '{}/'.format(auto.model))
+        return reverse('article_app:article', args=url_params)
 
 
 class Comment(models.Model):
-    article = models.ForeignKey(Article, verbose_name=_('related article'), on_delete=None)
+    article = models.ForeignKey(Article, verbose_name=_('related article'), on_delete=models.CASCADE)
     parent = models.ForeignKey(
-        'self', verbose_name=_('parent comment'), blank=True, null=True, on_delete=None)
+        'self', verbose_name=_('parent comment'), blank=True, null=True, on_delete=models.CASCADE)
     user_name = models.CharField(_('name'), max_length=50)
     user_email = models.EmailField(_('email'), blank=True)
     user_url = models.URLField(_('website'), blank=True)
@@ -160,12 +167,11 @@ class Comment(models.Model):
         # article slug can be fetched in same query with .extra()
         if self._article_slug is not None:
             self._article_url = reverse(
-                'article_app:article', args=[self._article_slug, "123"]
+                'article_app:article', args=[self._article_slug]
             )
         if self._article_url is None:
             self._article_url = (
-                Article.objects.only('slug').get(id=self.article_id)
-                    .get_absolute_url()
+                Article.objects.only('slug').get(id=self.article_id).get_absolute_url()
             )
         return '{}#comment-{}'.format(self._article_url, self.id)
 
@@ -174,8 +180,7 @@ class Comment(models.Model):
             self.created = timezone.now()
 
         article = (
-            Article.objects.only('is_comment_allowed')
-                .filter(pk=self.article_id).first()
+            Article.objects.only('is_comment_allowed').filter(pk=self.article_id).first()
         )
         if not getattr(article, 'is_comment_allowed', False):
             raise PermissionDenied()

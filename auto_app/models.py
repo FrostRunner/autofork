@@ -1,10 +1,20 @@
 from __future__ import unicode_literals
 
 from django.db import models
+from django_countries.fields import CountryField
+
+
+class AutoMake(models.Model):
+    name = models.CharField(max_length=255, default="Audi")
+    country = CountryField()
+    description = models.CharField(max_length=255, default="")
+
+    def __str__(self):
+        return self.name
 
 
 class AutoModel(models.Model):
-    make = models.CharField(max_length=255, default="Audi")
+    make = models.ForeignKey(AutoMake, blank=True, null=True, on_delete=models.CASCADE)
     model = models.CharField(max_length=255, default="A1")
     generation = models.CharField(max_length=255, default="1")
     category = models.CharField(max_length=255, default="Sedan")
@@ -20,6 +30,7 @@ class AutoModel(models.Model):
                             choices=[("АИ-92", "АИ-92"), ("АИ-95", "АИ-95"), ("АИ-98", "АИ-98"),
                                      ("Дизель", "Дизель")],
                             default="АИ-95")
+
     # Htcjvtylt
     # Динамические
     # характеристики
@@ -115,4 +126,4 @@ class AutoModel(models.Model):
     # дисковые
 
     def __str__(self):
-        return "_".join([self.make, self.model])
+        return self.model
